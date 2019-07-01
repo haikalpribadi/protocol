@@ -19,6 +19,8 @@
 package(default_visibility = ["//visibility:public"])
 
 load("@stackb_rules_proto//java:java_grpc_compile.bzl", "java_grpc_compile")
+load("@stackb_rules_proto//python:python_grpc_compile.bzl", "python_grpc_compile")
+load("@io_bazel_rules_python//python:python.bzl", "py_library")
 load("@graknlabs_build_tools//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
 
 proto_library(
@@ -38,8 +40,18 @@ proto_library(
     deps = [":concept-proto", ":answer-proto"],
 )
 
+python_grpc_compile(
+    name = "grakn_session_python",
+    deps = [
+        ":session-proto",
+        ":answer-proto",
+        ":concept-proto",
+    ],
+    visibility = ["//visibility:public"]
+)
+
 java_grpc_compile(
-    name = "session-src",
+    name = "grakn-session-java",
     deps = [
         ":session-proto",
         ":answer-proto",
@@ -47,9 +59,15 @@ java_grpc_compile(
     ]
 )
 
+py_library(
+    name = "python",
+    srcs = [":grakn_session_python"],
+    visibility = ["//visibility:public"]
+)
+
 java_library(
     name = "session",
-    srcs = [":session-src"],
+    srcs = [":grakn-session-java"],
     deps = [
         "//dependencies/maven/artifacts/com/google/guava:guava",
         "//dependencies/maven/artifacts/com/google/protobuf:protobuf-java",

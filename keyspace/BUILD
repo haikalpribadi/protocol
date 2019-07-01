@@ -21,21 +21,36 @@ package(
 )
 
 load("@stackb_rules_proto//java:java_grpc_compile.bzl", "java_grpc_compile")
+load("@stackb_rules_proto//python:python_grpc_compile.bzl", "python_grpc_compile")
+load("@io_bazel_rules_python//python:python.bzl", "py_library")
 load("@graknlabs_build_tools//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
+
 
 proto_library(
     name = "keyspace-proto",
     srcs = ["Keyspace.proto"],
 )
 
+python_grpc_compile(
+    name = "grakn_keyspace_python",
+    deps = [":keyspace-proto"],
+    visibility = ["//visibility:public"]
+)
+
+py_library(
+    name = "python",
+    srcs = [":grakn_keyspace_python"],
+    visibility = ["//visibility:public"]
+)
+
 java_grpc_compile(
-    name = "keyspace-src",
+    name = "grakn-keypsace-java",
     deps = [":keyspace-proto"]
 )
 
 java_library(
     name = "keyspace",
-    srcs = [":keyspace-src"],
+    srcs = [":grakn-keypsace-java"],
     deps = [
         "//dependencies/maven/artifacts/com/google/guava:guava",
         "//dependencies/maven/artifacts/com/google/protobuf:protobuf-java",
